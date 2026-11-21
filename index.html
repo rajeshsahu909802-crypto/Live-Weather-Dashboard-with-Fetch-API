@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeatherNow — Live Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <!-- A. Header -->
+    <header class="dashboard-header glass-card">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="15" r="7" fill="#FBBF24" />
+            <path d="M16 4V6.5M16 23.5V26M5 15H7.5M24.5 15H27M8.2 7.2L10 9M22 21L23.8 22.8M23.8 7.2L22 9M10 21L8.2 22.8" stroke="#FCD34D" stroke-width="2" stroke-linecap="round" />
+            <path d="M13 31H29.5C32.5376 31 35 28.5376 35 25.5C35 22.642 32.821 20.292 30.032 20.025C29.06 16.55 25.874 14 22.09 14C17.537 14 13.846 17.691 13.846 22.244C13.846 22.416 13.852 22.587 13.862 22.756C11.12 23.168 9 25.534 9 28.39C9 29.832 10.79 31 13 31Z" fill="url(#logoCloud)" />
+            <defs>
+              <linearGradient id="logoCloud" x1="9" y1="14" x2="35" y2="31" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#E0F2FE" />
+                <stop offset="1" stop-color="#60A5FA" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">WeatherNow</span>
+          <h1 class="dashboard-title">Live Weather Dashboard</h1>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="date-badge" aria-live="polite">
+          <i data-lucide="calendar" class="icon-sm"></i>
+          <span id="current-date-display">Loading date...</span>
+        </div>
+        <button
+          type="button"
+          id="theme-toggle"
+          class="theme-toggle-btn"
+          aria-label="Toggle dark and light theme"
+          title="Switch theme"
+        >
+          <i data-lucide="sun" id="theme-icon-sun" class="icon-sm"></i>
+          <i data-lucide="moon" id="theme-icon-moon" class="icon-sm hidden"></i>
+          <span id="theme-toggle-label">Light</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- B. Search Section -->
+    <section class="search-section glass-card" aria-label="City weather search">
+      <form id="search-form" class="search-form" novalidate>
+        <div class="search-input-wrap">
+          <i data-lucide="search" class="search-leading-icon"></i>
+          <label for="city-input" class="sr-only">Enter city name</label>
+          <input
+            type="text"
+            id="city-input"
+            class="city-input"
+            placeholder="Search any city worldwide (e.g., Jabalpur, Pune, London, New York)..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" id="clear-input-btn" class="clear-btn hidden" aria-label="Clear search input">
+            <i data-lucide="x" class="icon-xs"></i>
+          </button>
+        </div>
+        <button type="submit" id="search-btn" class="search-btn">
+          <span class="btn-label">Search</span>
+          <i data-lucide="arrow-right" class="icon-sm"></i>
+        </button>
+      </form>
+
+      <div class="quick-cities" aria-label="Quick city shortcuts">
+        <span class="quick-label">Quick search:</span>
+        <button type="button" class="city-chip" data-city="Jabalpur">Jabalpur</button>
+        <button type="button" class="city-chip" data-city="Pune">Pune</button>
+        <button type="button" class="city-chip" data-city="Mumbai">Mumbai</button>
+        <button type="button" class="city-chip" data-city="Delhi">Delhi</button>
+        <button type="button" class="city-chip" data-city="Indore">Indore</button>
+        <button type="button" class="city-chip" data-city="London">London</button>
+        <button type="button" class="city-chip" data-city="New York">New York</button>
+      </div>
+
+      <!-- Status / Loading / Error Banners -->
+      <div id="loading-banner" class="status-banner status-loading hidden" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="loading-text">Fetching weather information...</span>
+      </div>
+
+      <div id="error-banner" class="status-banner status-error hidden" role="alert" aria-live="assertive">
+        <i data-lucide="alert-circle" class="icon-sm"></i>
+        <span id="error-text"></span>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <main id="weather-content" class="dashboard-main hidden">
+      <!-- C. Current Weather Card -->
+      <section class="current-weather-card glass-card" aria-label="Current weather">
+        <div class="current-top">
+          <div class="location-block">
+            <div class="location-pill">
+              <i data-lucide="map-pin" class="icon-xs"></i>
+              <span id="city-region"></span>
+            </div>
+            <h2 id="city-name" class="city-heading"></h2>
+            <p id="weather-updated" class="updated-meta"></p>
+          </div>
+          <div class="current-condition-badge">
+            <div id="current-weather-icon" class="hero-weather-icon" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="current-temp-row">
+          <div class="temp-primary">
+            <span id="current-temp" class="temp-value">--</span>
+            <span class="temp-unit">°C</span>
+          </div>
+          <div class="condition-details">
+            <p id="weather-description" class="condition-title">--</p>
+            <p class="feels-like-line">
+              Feels like <strong id="feels-like">--°C</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="current-highlights-grid">
+          <div class="highlight-tile">
+            <div class="tile-header">
+              <i data-lucide="droplets" class="icon-xs accent-cyan"></i>
+              <span>Humidity</span>
+            </div>
+            <p id="current-humidity" class="tile-value">--%</p>
+          </div>
+
+          <div class="highlight-tile">
+            <div class="tile-header">
+              <i data-lucide="wind" class="icon-xs accent-sky"></i>
+              <span>Wind Speed</span>
+            </div>
+            <p id="current-wind" class="tile-value">-- km/h</p>
+          </div>
+
+          <div class="highlight-tile">
+            <div class="tile-header">
+              <i data-lucide="cloud-rain" class="icon-xs accent-indigo"></i>
+              <span>Precipitation</span>
+            </div>
+            <p id="current-precipitation" class="tile-value">-- mm</p>
+          </div>
+
+          <div class="highlight-tile">
+            <div class="tile-header">
+              <i data-lucide="sunrise" class="icon-xs accent-amber"></i>
+              <span>Sunrise</span>
+            </div>
+            <p id="current-sunrise" class="tile-value">--:--</p>
+          </div>
+
+          <div class="highlight-tile">
+            <div class="tile-header">
+              <i data-lucide="sunset" class="icon-xs accent-orange"></i>
+              <span>Sunset</span>
+            </div>
+            <p id="current-sunset" class="tile-value">--:--</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- E. Additional Weather Information -->
+      <section class="additional-info-section glass-card" aria-label="Additional weather metrics">
+        <div class="section-header">
+          <h3 class="section-title">Atmospheric Insights</h3>
+          <span id="timezone-badge" class="section-pill">Local Time</span>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Humidity</span>
+              <i data-lucide="droplets" class="icon-sm accent-cyan"></i>
+            </div>
+            <p id="metric-humidity-val" class="metric-value">--%</p>
+            <div class="progress-track" aria-hidden="true">
+              <div id="metric-humidity-bar" class="progress-fill fill-cyan" style="width: 0%;"></div>
+            </div>
+            <p id="metric-humidity-note" class="metric-note">--</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Wind Speed</span>
+              <i data-lucide="wind" class="icon-sm accent-sky"></i>
+            </div>
+            <p id="metric-wind-val" class="metric-value">-- km/h</p>
+            <div class="progress-track" aria-hidden="true">
+              <div id="metric-wind-bar" class="progress-fill fill-sky" style="width: 0%;"></div>
+            </div>
+            <p id="metric-wind-note" class="metric-note">--</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Pressure</span>
+              <i data-lucide="gauge" class="icon-sm accent-violet"></i>
+            </div>
+            <p id="metric-pressure-val" class="metric-value">-- hPa</p>
+            <div class="progress-track" aria-hidden="true">
+              <div id="metric-pressure-bar" class="progress-fill fill-violet" style="width: 0%;"></div>
+            </div>
+            <p id="metric-pressure-note" class="metric-note">--</p>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Cloud Cover</span>
+              <i data-lucide="cloud" class="icon-sm accent-indigo"></i>
+            </div>
+            <p id="metric-clouds-val" class="metric-value">--%</p>
+            <div class="progress-track" aria-hidden="true">
+              <div id="metric-clouds-bar" class="progress-fill fill-indigo" style="width: 0%;"></div>
+            </div>
+            <p id="metric-clouds-note" class="metric-note">--</p>
+          </article>
+
+          <article class="metric-card metric-card-wide">
+            <div class="metric-top">
+              <span class="metric-label">UV Index (Daily Max)</span>
+              <i data-lucide="sun" class="icon-sm accent-amber"></i>
+            </div>
+            <div class="uv-row">
+              <p id="metric-uv-val" class="metric-value">--</p>
+              <span id="metric-uv-badge" class="uv-badge">--</span>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div id="metric-uv-bar" class="progress-fill fill-uv" style="width: 0%;"></div>
+            </div>
+            <p id="metric-uv-note" class="metric-note">--</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- D. Five-Day Forecast -->
+      <section class="forecast-section glass-card" aria-label="Five-day weather forecast">
+        <div class="section-header">
+          <h3 class="section-title">5-Day Forecast</h3>
+          <span class="section-pill">Daily High / Low</span>
+        </div>
+        <div id="forecast-grid" class="forecast-grid"></div>
+      </section>
+    </main>
+
+    <footer class="dashboard-footer">
+      <p>
+        Powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo Free Weather API</a> · No API key required
+      </p>
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
